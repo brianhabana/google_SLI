@@ -1,0 +1,38 @@
+SELECT
+    startdate.account_name AS account_name,
+    startdate.social_network AS social_network,
+    DATE_FORMAT(enddate.date, '%M %D') AS enddate,
+    DATE_FORMAT(startdate.date, '%M %D') AS startdate,
+    FORMAT(enddate.followers, 0) AS followers_end,
+    FORMAT(startdate.followers, 0) AS followers_start,
+    FORMAT(enddate.followers - startdate.followers, 0) AS followers_change,
+    CONCAT(
+        ROUND(
+            (
+                enddate.followers / startdate.followers -1
+            ) * 100,
+            2
+        ),
+        '%'
+    ) AS followers_changeperc
+FROM
+    (
+        SELECT
+            *
+        FROM
+            allownedposts.followers
+        WHERE
+            date = '{{get_new_attributes.attributes__Custom_StartDate}}'
+            AND account_name = '{{get_new_attributes.attributes__Account}}'
+            AND social_network = '{{get_new_attributes.attributes__Social_Network}}'
+    ) AS startdate,
+    (
+        SELECT
+            *
+        FROM
+            allownedposts.followers
+        WHERE
+            date = '{{get_new_attributes.attributes__Custom_EndDate}}'
+            AND account_name = '{{get_new_attributes.attributes__Account}}'
+            AND social_network = '{{get_new_attributes.attributes__Social_Network}}'
+    ) AS enddate

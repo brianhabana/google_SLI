@@ -1,0 +1,13 @@
+SELECT
+    CASE
+        WHEN EXISTS (
+            SELECT
+                Account
+            FROM
+                allownedposts.allposts
+            WHERE
+                Account = '{{get_all_attributes.attributes__Account}}'
+                AND Social_Network = '{{get_all_attributes.attributes__Social_Network}}'
+        ) THEN 'match_found'
+        ELSE 'nan'
+    END AS 'Account_Match'

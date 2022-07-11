@@ -1,0 +1,96 @@
+SELECT
+    TRIM(Campaign_Name) AS Campaign_Name,
+    Account,
+    Social_Network,
+    CONCAT(FORMAT(PostCount, 0), ' posts') AS PostCount,
+    CONCAT(FORMAT(EngagementsAvg, 0), ' avg engagements') AS EngagementsAvg,
+    CONCAT('(', FORMAT(EngagementsMax, 0), ' max)') AS EngagementsMax,
+    CONCAT('(', FORMAT(EngagementsMin, 0), ' min)') AS EngagementsMin,
+    CONCAT(
+        FORMAT(EngagementRateAvg, 2),
+        '% avg engagement rate'
+    ) AS EngagementRateAvg,
+    CONCAT('(', FORMAT(EngagementRateMax, 2), '% max)') AS EngagementRateMax,
+    CONCAT('(', FORMAT(EngagementRateMin, 2), '% min)') AS EngagementRateMin,
+    FORMAT(AccountEngagementsAvg, 2) AS AccountEngagementsAvg,
+    CONCAT(
+        FORMAT(EngagementAvgComp, 0),
+        '% of account average'
+    ) AS EngagementAvgComp,
+    TimeframeText
+FROM
+    (
+        SELECT
+            c.Campaign_Name,
+            c.Account,
+            c.Social_Network,
+            c.PostCount,
+            c.EngagementsAvg,
+            c.EngagementsMax,
+            c.EngagementsMin,
+            c.EngagementRateAvg,
+            c.EngagementRateMax,
+            c.EngagementRateMin,
+            a.AccountEngagementsAvg,
+            CONCAT(
+                ROUND(
+                    (c.EngagementsAvg / a.AccountEngagementsAvg) * 100,
+                    0
+                ),
+                '%'
+            ) AS EngagementAvgComp,
+            TimeframeText
+        FROM
+            (
+                SELECT
+                    Campaign_Name,
+                    Account,
+                    Social_Network,
+                    COUNT(Campaign_Name) AS PostCount,
+                    ROUND(AVG(Engagements), 0) AS EngagementsAvg,
+                    MAX(Engagements) AS EngagementsMax,
+                    MIN(Engagements) AS EngagementsMin,
+                    AVG(Engagement_Rate) AS EngagementRateAvg,
+                    MAX(Engagement_Rate) AS EngagementRateMax,
+                    MIN(Engagement_Rate) AS EngagementRateMin,
+                    TimeframeText
+                FROM
+                    { { get_all_attributes.attributes__Timeframe } }
+                WHERE
+                    Published_Date BETWEEN '{{get_all_attributes.attributes__Custom_StartDate}}'
+                    AND '{{get_all_attributes.attributes__Custom_EndDate}}'
+                    AND Account = '{{get_all_attributes.attributes__Account}}'
+                    AND Social_Network = '{{get_all_attributes.attributes__Social_Network}}'
+                    AND IG_STORY_IMPRESSIONS = 0
+                GROUP BY
+                    Campaign_Name,
+                    Account,
+                    Social_Network
+            ) c,
+            (
+                SELECT
+                    Account,
+                    Social_Network,
+                    ROUND(AVG(Engagements), 0) AS AccountEngagementsAvg,
+                    MAX(Engagements) AS AccountEngagementsMax,
+                    MIN(Engagements) AS AccountEngagementsMin,
+                    AVG(Engagement_Rate) AS AccountEngagementRateAvg,
+                    MAX(Engagement_Rate) AS AccountEngagementRateMax,
+                    MIN(Engagement_Rate) AS AccountEngagementRateMin
+                FROM
+                    { { get_all_attributes.attributes__Timeframe } }
+                WHERE
+                    Published_Date BETWEEN '{{get_all_attributes.attributes__Custom_StartDate}}'
+                    AND '{{get_all_attributes.attributes__Custom_EndDate}}'
+                    AND Account = '{{get_all_attributes.attributes__Account}}'
+                    AND Social_Network = '{{get_all_attributes.attributes__Social_Network}}'
+                    AND IG_STORY_IMPRESSIONS = 0
+                GROUP BY
+                    Account,
+                    Social_Network
+            ) a
+        ORDER BY
+            { { ask_for_rank_metric.parsed_answer } } DESC
+        LIMIT
+            100
+    ) f

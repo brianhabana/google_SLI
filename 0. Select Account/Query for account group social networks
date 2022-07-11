@@ -1,0 +1,26 @@
+SELECT
+    *
+FROM
+    (
+        SELECT
+            Social_Network,
+            count(Distinct Account) AS Account_count
+        FROM
+            allownedposts.allposts
+        WHERE
+            account_groups LIKE '%{{pick_an_account_group.choice}}%'
+        GROUP BY
+            Social_Network
+        ORDER BY
+            Social_Network ASC
+    ) a,
+    (
+        SELECT
+            count(Distinct Social_Network) AS Social_Network_count
+        FROM
+            allownedposts.allposts
+        WHERE
+            account_groups LIKE '%{{pick_an_account_group.choice}}%'
+        ORDER BY
+            Social_Network ASC
+    ) sn

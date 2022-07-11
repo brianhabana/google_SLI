@@ -1,0 +1,15 @@
+SELECT
+    Region,
+    Social_Network,
+    COUNT(DISTINCT Account) AS AccountCount
+FROM
+    { { get_all_attributes.attributes__Timeframe } }
+WHERE
+    Social_Network = '{{get_all_attributes.attributes__Social_Network}}'
+    AND Region LIKE '%{{get_all_attributes.attributes__Region}}%'
+    AND Published_Date BETWEEN '{{get_all_attributes.attributes__Custom_StartDate}}'
+    AND '{{get_all_attributes.attributes__Custom_EndDate}}'
+    AND IG_STORY_IMPRESSIONS = 0
+GROUP BY
+    Region,
+    Social_Network

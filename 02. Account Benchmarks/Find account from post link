@@ -1,0 +1,8 @@
+SELECT
+    *
+FROM
+    allownedposts.allposts
+WHERE
+    permalink LIKE ('%{{get_all_attributes.attributes__Post_Link}}%')
+LIMIT
+    1

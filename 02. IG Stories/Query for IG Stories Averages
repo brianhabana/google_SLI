@@ -1,0 +1,31 @@
+SELECT
+    Account,
+    Social_Network,
+    TimeframeText,
+    TimeframeName,
+    CONCAT(
+        FORMAT(SUM(IG_STORY_IMPRESSIONS), 0),
+        ' impressions'
+    ) AS Impressions_Total,
+    CONCAT(
+        FORMAT(AVG(IG_STORY_IMPRESSIONS), 0),
+        ' impressions per frame'
+    ) AS Impressions_Avg,
+    CONCAT(
+        FORMAT(AVG(IG_STORY_COMPLETION_RATE), 2),
+        '% completion rate'
+    ) AS Completion_Rate_Avg,
+    CONCAT(FORMAT(COUNT(Account), 0), ' frames') AS Frames_Count
+FROM
+    { { get_all_attributes.attributes__Timeframe } }
+WHERE
+    Published_Date BETWEEN '{{get_all_attributes.attributes__Custom_StartDate}}'
+    AND '{{get_all_attributes.attributes__Custom_EndDate}}'
+    AND Account = '{{get_all_attributes.attributes__Account}}'
+    AND IG_STORY_IMPRESSIONS > 0
+    AND Social_Network = 'Instagram'
+GROUP BY
+    Account,
+    Social_Network,
+    TimeframeText,
+    TimeframeName

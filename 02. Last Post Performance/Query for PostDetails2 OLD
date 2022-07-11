@@ -1,0 +1,12 @@
+SELECT
+    Account,
+    Social_Network,
+    CONCAT(FORMAT(Engagements, 0), ' engagements') AS Engagements,
+    CONCAT(FORMAT(Impressions, 0), ' impressions') AS Impressions,
+    CONCAT(FORMAT(Engagement_Rate, 2), '% engagement rate') AS Engagement_Rate
+FROM
+    allownedposts.googlepostdata
+WHERE
+    permalink LIKE ('%{{get_all_attributes.attributes__Post_Link}}%')
+LIMIT
+    1

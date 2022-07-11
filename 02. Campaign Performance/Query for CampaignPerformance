@@ -1,0 +1,70 @@
+SELECT
+    c.Campaign_Name,
+    c.Account,
+    c.Social_Network,
+    c.PostCount,
+    c.EngagementsAvg,
+    c.EngagementsMax,
+    c.EngagementsMin,
+    c.EngagementRateAvg,
+    c.EngagementRateMax,
+    c.EngagementRateMin,
+    a.AccountEngagementsAvg,
+    CONCAT(
+        FORMAT(
+            (c.EngagementsAvg / a.AccountEngagementsAvg) * 100,
+            0
+        ),
+        '%'
+    ) AS EngagementAvgComp,
+    TimeframeText
+FROM
+    (
+        SELECT
+            Campaign_Name,
+            Account,
+            Social_Network,
+            COUNT(Campaign_Name) AS PostCount,
+            FORMAT(AVG(Engagements), 0) AS EngagementsAvg,
+            FORMAT(MAX(Engagements), 0) AS EngagementsMax,
+            FORMAT(MIN(Engagements), 0) AS EngagementsMin,
+            FORMAT(AVG(Engagement_Rate), 2) AS EngagementRateAvg,
+            FORMAT(MAX(Engagement_Rate), 2) AS EngagementRateMax,
+            FORMAT(MIN(Engagement_Rate), 2) AS EngagementRateMin,
+            TimeframeText
+        FROM
+            { { get_all_attributes.attributes__Timeframe } }
+        WHERE
+            Published_Date BETWEEN '{{get_all_attributes.attributes__Custom_StartDate}}'
+            AND '{{get_all_attributes.attributes__Custom_EndDate}}'
+            AND Account = '{{get_all_attributes.attributes__Account}}'
+            AND Social_Network = '{{get_all_attributes.attributes__Social_Network}}'
+            AND Campaign_Name = '{{get_campaign_attribute.attributes__Campaign_Name}}'
+            AND IG_STORY_IMPRESSIONS = 0
+        GROUP BY
+            Campaign_Name,
+            Account,
+            Social_Network
+    ) c,
+    (
+        SELECT
+            Account,
+            Social_Network,
+            FORMAT(AVG(Engagements), 0) AS AccountEngagementsAvg,
+            FORMAT(MAX(Engagements), 0) AS AccountEngagementsMax,
+            FORMAT(MIN(Engagements), 0) AS AccountEngagementsMin,
+            FORMAT(AVG(Engagement_Rate), 2) AS AccountEngagementRateAvg,
+            FORMAT(MAX(Engagement_Rate), 2) AS AccountEngagementRateMax,
+            FORMAT(MIN(Engagement_Rate), 2) AS AccountEngagementRateMin
+        FROM
+            { { get_all_attributes.attributes__Timeframe } }
+        WHERE
+            Published_Date BETWEEN '{{get_all_attributes.attributes__Custom_StartDate}}'
+            AND '{{get_all_attributes.attributes__Custom_EndDate}}'
+            AND Account = '{{get_all_attributes.attributes__Account}}'
+            AND Social_Network = '{{get_all_attributes.attributes__Social_Network}}'
+            AND IG_STORY_IMPRESSIONS = 0
+        GROUP BY
+            Account,
+            Social_Network
+    ) a

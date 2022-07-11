@@ -1,0 +1,15 @@
+SELECT
+    Account,
+    Social_Network,
+    CONCAT(FORMAT(Engagements, 0), ' engagements') AS Engagements,
+    CONCAT(FORMAT(Impressions, 0), ' impressions') AS Impressions,
+    CONCAT(FORMAT(Engagement_Rate, 2), '% engagement rate') AS Engagement_Rate,
+    Permalink
+FROM
+    allownedposts.365day_googleposts
+WHERE
+    Social_Network = 'Facebook'
+    AND NoHash LIKE "%{{extract_first_75_characters_fbpostcopy.string1}}%"
+    AND IG_STORY_IMPRESSIONS = 0
+LIMIT
+    5

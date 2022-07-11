@@ -1,0 +1,139 @@
+SELECT
+    Account,
+    Social_Network,
+    CONCAT(FORMAT(Med_Engagements, 0), ' engagements') AS Med_Engagements,
+    CONCAT(FORMAT(Med_Impressions, 0), ' impressions') AS Med_Impressions,
+    CONCAT(
+        FORMAT(Med_Engagement_Rate, 2),
+        '% engagement rate'
+    ) AS Med_Engagement_Rate,
+    Med_Engagement_Rate AS Med_Engagement_Rate_Num,
+    TimeframeText
+FROM
+    (
+        SELECT
+            AVG(middle_values) AS 'Med_Engagements'
+        FROM
+            (
+                SELECT
+                    t1.Engagements AS 'middle_values'
+                FROM
+                    (
+                        SELECT
+                            @row := @row + 1 AS `row`,
+                            x.Engagements
+                        FROM
+                            { { get_all_attributes_2.attributes__Timeframe } } AS x,
+                            (
+                                SELECT
+                                    @row := 0
+                            ) AS r
+                        WHERE
+                            Account = '{{get_all_attributes_2.attributes__Account}}'
+                            AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+                        ORDER BY
+                            x.Engagements
+                    ) AS t1,
+                    (
+                        SELECT
+                            COUNT(*) AS 'count'
+                        FROM
+                            { { get_all_attributes_2.attributes__Timeframe } } x
+                        WHERE
+                            Account = '{{get_all_attributes_2.attributes__Account}}'
+                            AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+                    ) AS t2
+                WHERE
+                    t1.row >= t2.count / 2
+                    AND t1.row <= ((t2.count / 2) + 1)
+            ) AS t3
+    ) AS tEngagements,
+    (
+        SELECT
+            AVG(middle_values) AS 'Med_Impressions'
+        FROM
+            (
+                SELECT
+                    t1.Impressions AS 'middle_values'
+                FROM
+                    (
+                        SELECT
+                            @row := @row + 1 AS `row`,
+                            x.Impressions
+                        FROM
+                            { { get_all_attributes_2.attributes__Timeframe } } AS x,
+                            (
+                                SELECT
+                                    @row := 0
+                            ) AS r
+                        WHERE
+                            Account = '{{get_all_attributes_2.attributes__Account}}'
+                            AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+                        ORDER BY
+                            x.Impressions
+                    ) AS t1,
+                    (
+                        SELECT
+                            COUNT(*) AS 'count'
+                        FROM
+                            { { get_all_attributes_2.attributes__Timeframe } } x
+                        WHERE
+                            Account = '{{get_all_attributes_2.attributes__Account}}'
+                            AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+                    ) AS t2
+                WHERE
+                    t1.row >= t2.count / 2
+                    AND t1.row <= ((t2.count / 2) + 1)
+            ) AS t3
+    ) AS tImpressions,
+    (
+        SELECT
+            AVG(middle_values) AS 'Med_Engagement_Rate'
+        FROM
+            (
+                SELECT
+                    t1.Engagement_Rate AS 'middle_values'
+                FROM
+                    (
+                        SELECT
+                            @row := @row + 1 AS `row`,
+                            x.Engagement_Rate
+                        FROM
+                            { { get_all_attributes_2.attributes__Timeframe } } AS x,
+                            (
+                                SELECT
+                                    @row := 0
+                            ) AS r
+                        WHERE
+                            Account = '{{get_all_attributes_2.attributes__Account}}'
+                            AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+                        ORDER BY
+                            x.Engagement_Rate
+                    ) AS t1,
+                    (
+                        SELECT
+                            COUNT(*) AS 'count'
+                        FROM
+                            { { get_all_attributes_2.attributes__Timeframe } } x
+                        WHERE
+                            Account = '{{get_all_attributes_2.attributes__Account}}'
+                            AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+                    ) AS t2
+                WHERE
+                    t1.row >= t2.count / 2
+                    AND t1.row <= ((t2.count / 2) + 1)
+            ) AS t3
+    ) AS tEngagement_Rate,
+    (
+        SELECT
+            Account,
+            Social_Network,
+            TimeframeText
+        FROM
+            { { get_all_attributes_2.attributes__Timeframe } }
+        WHERE
+            Account = '{{get_all_attributes_2.attributes__Account}}'
+            AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+    ) AS tAccountDetails
+LIMIT
+    1

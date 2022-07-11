@@ -1,0 +1,26 @@
+SELECT
+    *
+FROM
+    (
+        SELECT
+            Social_Network,
+            count(DISTINCT Account) AS Account_count
+        FROM
+            allownedposts.allposts
+        WHERE
+            Region LIKE '%{{pick_a_region.choice}}%'
+        GROUP BY
+            Social_Network
+        ORDER BY
+            Social_Network ASC
+    ) a,
+    (
+        SELECT
+            count(DISTINCT Social_Network) AS Social_Network_count
+        FROM
+            allownedposts.allposts
+        WHERE
+            Region LIKE '%{{pick_a_region.choice}}%'
+        ORDER BY
+            Social_Network ASC
+    ) sn

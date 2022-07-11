@@ -1,0 +1,9 @@
+SELECT
+    count(DISTINCT Account) AS count
+FROM
+    allownedposts.allposts
+WHERE
+    account_groups LIKE '%{{get_all_attributes.attributes__Account_Group}}%'
+    AND social_network = '{{get_all_attributes.attributes__Social_Network}}'
+ORDER BY
+    account ASC

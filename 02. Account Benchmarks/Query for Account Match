@@ -1,0 +1,22 @@
+SELECT
+    CASE
+        WHEN EXISTS (
+            SELECT
+                Account
+            FROM
+                allownedposts.allposts
+            WHERE
+                Account = '{{get_all_attributes_2.attributes__Account}}'
+                AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+        ) THEN 'match_found'
+        WHEN EXISTS (
+            SELECT
+                Account
+            FROM
+                allownedposts.allposts
+            WHERE
+                Permalink LIKE '%twitter.com/{{get_all_attributes_2.attributes__Account}}/%'
+                AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+        ) THEN 'match_found'
+        ELSE 'nan'
+    END AS 'Account_Match'

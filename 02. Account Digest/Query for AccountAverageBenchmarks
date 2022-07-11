@@ -1,0 +1,124 @@
+SELECT
+    CASE
+        WHEN Social_Network <> 'Facebook'
+        OR Social_Network <> 'LinkedIn' THEN CONCAT('@', Account)
+        ELSE Account
+    END AS Account,
+    Social_Network,
+    FORMAT(Avg_Engagements_previousquarter, 0) AS Avg_Engagements,
+    CONCAT(
+        FORMAT(Avg_Engagement_Rate_previousquarter, 2),
+        '%'
+    ) AS Avg_Engagement_Rate,
+    FORMAT(Avg_Engagement_Rate_previousquarter, 2) AS Avg_Engagement_Rate_Num,
+    FORMAT(Avg_Impressions_previousquarter, 0) AS Avg_Impressions,
+    FORMAT(MAX_Engagements_previousquarter, 0) AS MAX_Engagements,
+    CONCAT(
+        FORMAT(MAX_Engagement_Rate_previousquarter, 2),
+        '%'
+    ) AS MAX_Engagement_Rate,
+    FORMAT(MAX_Impressions_previousquarter, 0) AS MAX_Impressions,
+    CASE
+        WHEN (
+            Avg_Engagements_timeframe / Avg_Engagements_previousquarter
+        ) = 1 THEN 'equal to'
+        ELSE CONCAT(
+            FORMAT(
+                Avg_Engagements_timeframe / Avg_Engagements_previousquarter,
+                2
+            ),
+            'x'
+        )
+    END AS Comp_Engagements,
+    CASE
+        WHEN (
+            Avg_Engagement_Rate_timeframe / Avg_Engagement_Rate_previousquarter
+        ) = 1 THEN 'equal to'
+        ELSE CONCAT(
+            FORMAT(
+                Avg_Engagement_Rate_timeframe / Avg_Engagement_Rate_previousquarter,
+                2
+            ),
+            'x'
+        )
+    END AS Comp_Engagement_Rate,
+    CASE
+        WHEN (
+            Avg_Impressions_timeframe / Avg_Impressions_previousquarter
+        ) = 1 THEN 'equal to'
+        ELSE CONCAT(
+            FORMAT(
+                Avg_Impressions_timeframe / Avg_Impressions_previousquarter,
+                2
+            ),
+            'x'
+        )
+    END AS Comp_Impressions,
+    TimeframeText,
+    Comp_TimeframeText,
+    Comp_TimeframeName
+FROM
+    (
+        SELECT
+            count(Engagements) AS Post_Count_timeframe,
+            avg(Engagements) AS Avg_Engagements_timeframe,
+            avg(Engagement_Rate) AS Avg_Engagement_Rate_timeframe,
+            avg(Impressions) AS Avg_Impressions_timeframe,
+            avg(Likes) AS Avg_Likes_timeframe,
+            avg(Comments) AS Avg_Comments_timeframe,
+            avg(Shares) AS Avg_Shares_timeframe,
+            MAX(Engagements) AS MAX_Engagements_timeframe,
+            MAX(Engagement_Rate) AS MAX_Engagement_Rate_timeframe,
+            MAX(Impressions) AS MAX_Impressions_timeframe,
+            MAX(Likes) AS MAX_Likes_timeframe,
+            MAX(Comments) AS MAX_Comments_timeframe,
+            MAX(Shares) AS MAX_Shares_timeframe,
+            TimeframeText,
+            TimeframeName
+        FROM
+            { { get_all_attributes_2.attributes__Timeframe } }
+        WHERE
+            Published_Date BETWEEN '{{get_all_attributes_2.attributes__Custom_StartDate}}'
+            AND '{{get_all_attributes_2.attributes__Custom_EndDate}}'
+            AND Account = '{{get_all_attributes_2.attributes__Account}}'
+            AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+            AND IG_STORY_IMPRESSIONS = 0
+        GROUP BY
+            Account,
+            TimeframeText,
+            TimeframeName
+        LIMIT
+            10
+    ) AS timeframe_avgs,
+    (
+        SELECT
+            Account,
+            Social_Network,
+            count(Engagements) AS Post_Count_previousquarter,
+            avg(Engagements) AS Avg_Engagements_previousquarter,
+            avg(Engagement_Rate) AS Avg_Engagement_Rate_previousquarter,
+            avg(Impressions) AS Avg_Impressions_previousquarter,
+            avg(Likes) AS Avg_Likes_previousquarter,
+            avg(Comments) AS Avg_Comments_previousquarter,
+            avg(Shares) AS Avg_Shares_previousquarter,
+            MAX(Engagements) AS MAX_Engagements_previousquarter,
+            MAX(Engagement_Rate) AS MAX_Engagement_Rate_previousquarter,
+            MAX(Impressions) AS MAX_Impressions_previousquarter,
+            MAX(Likes) AS MAX_Likes_previousquarter,
+            MAX(Comments) AS MAX_Comments_previousquarter,
+            MAX(Shares) AS MAX_Shares_previousquarter,
+            TimeframeText AS Comp_TimeframeText,
+            QuarterName AS Comp_TimeframeName
+        FROM
+            allownedposts.previousquarter_googleposts
+        WHERE
+            Account = '{{get_all_attributes_2.attributes__Account}}'
+            AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+            AND IG_STORY_IMPRESSIONS = 0
+        GROUP BY
+            Account,
+            Comp_TimeframeText,
+            Comp_TimeframeName
+        LIMIT
+            10
+    ) AS previousquarter_avgs

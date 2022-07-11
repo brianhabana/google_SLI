@@ -1,0 +1,66 @@
+SELECT
+    REPLACE(
+        REPLACE(Outbound_Post, char(13) + char(10), ''),
+        'https://',
+        ''
+    ) AS Outbound_Post,
+    CONCAT(
+        DATE_FORMAT(Published_Date, "%b"),
+        ' ',
+        DATE_FORMAT(Published_Date, "%D")
+    ) AS Published_Date,
+    Permalink,
+    Account,
+    Social_Network,
+    CONCAT(FORMAT(Engagements, 0), ' engagements') AS Engagements,
+    CONCAT(FORMAT(Engagement_Rate, 0), '% engagement rate') AS Engagement_Rate,
+    CONCAT(FORMAT(Impressions, 0), ' impressions') AS Impressions,
+    CONCAT(FORMAT(Likes, 0), ' likes') AS Likes,
+    CONCAT(FORMAT(Comments, 0), ' comments') AS Comments,
+    CONCAT(FORMAT(Shares, 0), ' shares') AS Shares,
+    CONCAT(Post_Count, ' posts') AS Post_Count,
+    TimeframeText,
+    TimeframeName
+FROM
+    (
+        SELECT
+            Outbound_Post,
+            Published_Date,
+            Permalink,
+            Account,
+            Social_Network,
+            Engagements,
+            Engagement_Rate,
+            Impressions,
+            Likes,
+            Comments,
+            Shares,
+            TimeframeText,
+            TimeframeName
+        FROM
+            { { get_all_attributes_2.attributes__Timeframe } }
+        WHERE
+            Published_Date BETWEEN '{{get_all_attributes_2.attributes__Custom_StartDate}}'
+            AND '{{get_all_attributes_2.attributes__Custom_EndDate}}'
+            AND Account = '{{get_all_attributes_2.attributes__Account}}'
+            AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+            AND Engagement_Rate > { { query_for_accountaveragebenchmarks.result__rows__0__Avg_Engagement_Rate_Num } }
+            AND IG_STORY_IMPRESSIONS = 0
+        ORDER BY
+            { { get_all_attributes_2.attributes__Metric } } DESC
+        LIMIT
+            10
+    ) AS formatted_table,
+    (
+        SELECT
+            COUNT(Permalink) AS Post_Count
+        FROM
+            { { get_all_attributes_2.attributes__Timeframe } }
+        WHERE
+            Published_Date BETWEEN '{{get_all_attributes_2.attributes__Custom_StartDate}}'
+            AND '{{get_all_attributes_2.attributes__Custom_EndDate}}'
+            AND Account = '{{get_all_attributes_2.attributes__Account}}'
+            AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+            AND Engagement_Rate > { { query_for_accountaveragebenchmarks.result__rows__0__Avg_Engagement_Rate_Num } }
+            AND IG_STORY_IMPRESSIONS = 0
+    ) AS row_count

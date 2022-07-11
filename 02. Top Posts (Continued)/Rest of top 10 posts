@@ -1,0 +1,43 @@
+SELECT
+    Outbound_Post,
+    CONCAT(
+        DATE_FORMAT(Published_Date, "%b"),
+        ' ',
+        DATE_FORMAT(Published_Date, "%D")
+    ) AS Published_Date,
+    Permalink,
+    Account,
+    Social_Network,
+    CONCAT(FORMAT(Engagements, 0), ' engagements') AS Engagements,
+    CONCAT(Engagement_Rate, '% engagement rate') AS Engagement_Rate,
+    CONCAT(FORMAT(Impressions, 0), ' impressions') AS Impressions,
+    CONCAT(FORMAT(Likes, 0), ' likes') AS Likes,
+    CONCAT(FORMAT(Comments, 0), ' comments') AS Comments,
+    CONCAT(FORMAT(Shares, 0), ' shares') AS Shares
+FROM
+    (
+        SELECT
+            Outbound_Post,
+            Published_Date,
+            Permalink,
+            Account,
+            Social_Network,
+            Engagements,
+            Engagement_Rate,
+            Impressions,
+            Likes,
+            Comments,
+            Shares
+        FROM
+            { { get_all_attributes.attributes__Timeframe } }
+        WHERE
+            Published_Date BETWEEN '{{get_all_attributes.attributes__Custom_StartDate}}'
+            AND '{{get_all_attributes.attributes__Custom_EndDate}}'
+            AND Account = "{{get_all_attributes.attributes__Account}}"
+            AND IG_STORY_IMPRESSIONS = 0
+            AND Social_Network = "{{get_all_attributes.attributes__Social_Network}}"
+        ORDER BY
+            { { get_all_attributes.attributes__Metric } } DESC
+        LIMIT
+            10
+    ) AS formatted_table

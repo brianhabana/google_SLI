@@ -1,0 +1,117 @@
+SELECT
+    *
+FROM
+    (
+        SELECT
+            CASE
+                WHEN EXISTS (
+                    SELECT
+                        { { get_new_attributes.attributes__Metric } }
+                    FROM
+                        allownedposts.custom_googleposts
+                    WHERE
+                        Permalink LIKE "%{{get_new_attributes.attributes__Post_Link}}%"
+                        AND Account = "{{get_new_attributes.attributes__Account}}"
+                ) THEN (
+                    SELECT
+                        CONCAT('#', 1 + COUNT(*)) AS Ranked_List
+                    FROM
+                        { { get_new_attributes.attributes__Timeframe } }
+                    WHERE
+                        Published_Date BETWEEN '{{get_new_attributes.attributes__Custom_StartDate}}'
+                        AND '{{get_new_attributes.attributes__Custom_EndDate}}'
+                        AND Account = "{{get_new_attributes.attributes__Account}}"
+                        AND Social_Network = "{{get_new_attributes.attributes__Social_Network}}"
+                        AND IG_STORY_IMPRESSIONS = 0
+                        AND { { get_new_attributes.attributes__Metric } } > (
+                            SELECT
+                                { { get_new_attributes.attributes__Metric } }
+                            FROM
+                                allownedposts.custom_googleposts
+                            WHERE
+                                Permalink LIKE "%{{get_new_attributes.attributes__Post_Link}}%"
+                                AND Account = "{{get_new_attributes.attributes__Account}}"
+                            ORDER BY
+                                Published_Time ASC
+                            LIMIT
+                                1
+                        )
+                )
+                ELSE 'nan'
+            END AS 'Ranked_List'
+    ) AS Metric_Rank,
+    (
+        SELECT
+            CASE
+                WHEN { { get_new_attributes.attributes__Metric } } > 1 THEN FORMAT({ { get_new_attributes.attributes__Metric } }, 0)
+                ELSE FORMAT({ { get_new_attributes.attributes__Metric } }, 2)
+            END AS Metric
+        FROM
+            allownedposts.custom_googleposts
+        WHERE
+            Permalink LIKE "%{{get_new_attributes.attributes__Post_Link}}%"
+            AND Account = "{{get_new_attributes.attributes__Account}}"
+    ) AS Metric_A,
+    (
+        SELECT
+            CASE
+                WHEN Comparison_Raw < 0 THEN CONCAT(FORMAT(ABS(Comparison_Raw), 0), '% below the ')
+                WHEN Comparison_Raw >= 0 THEN CONCAT(FORMAT(Comparison_Raw, 0), '% above the ')
+                ELSE 'equal to the '
+            END AS Comparison
+        FROM
+            (
+                SELECT
+                    ((Metric / MetricAvg) -1) * 100 AS Comparison_Raw
+                FROM
+                    (
+                        (
+                            SELECT
+                                { { get_new_attributes.attributes__Metric } } AS Metric
+                            FROM
+                                allownedposts.custom_googleposts
+                            WHERE
+                                Permalink LIKE "%{{get_new_attributes.attributes__Post_Link}}%"
+                                AND Account = "{{get_new_attributes.attributes__Account}}"
+                        ) AS Channel_A1,
+                        (
+                            SELECT
+                                AVG({ { get_new_attributes.attributes__Metric } }) AS MetricAvg
+                            FROM
+                                { { get_new_attributes.attributes__Timeframe } }
+                            WHERE
+                                Published_Date BETWEEN '{{get_new_attributes.attributes__Custom_StartDate}}'
+                                AND '{{get_new_attributes.attributes__Custom_EndDate}}'
+                                AND Account = "{{get_new_attributes.attributes__Account}}"
+                                AND IG_STORY_IMPRESSIONS = 0
+                                AND Social_Network = "{{get_new_attributes.attributes__Social_Network}}"
+                        ) AS Comparison_A2
+                    )
+            ) AS Comparison_B
+    ) AS Comparison_C,
+    (
+        SELECT
+            CASE
+                WHEN AVG({ { get_new_attributes.attributes__Metric } }) > 1 THEN FORMAT(
+                    AVG({ { get_new_attributes.attributes__Metric } }),
+                    0
+                )
+                ELSE FORMAT(
+                    AVG({ { get_new_attributes.attributes__Metric } }),
+                    2
+                )
+            END AS AccountAvg,
+            TimeframeText,
+            TimeframeName
+        FROM
+            { { get_new_attributes.attributes__Timeframe } }
+        WHERE
+            Published_Date BETWEEN '{{get_new_attributes.attributes__Custom_StartDate}}'
+            AND '{{get_new_attributes.attributes__Custom_EndDate}}'
+            AND Account = "{{get_new_attributes.attributes__Account}}"
+            AND IG_STORY_IMPRESSIONS = 0
+            AND Social_Network = "{{get_new_attributes.attributes__Social_Network}}"
+    ) AS AccountAvg_A
+
+
+    

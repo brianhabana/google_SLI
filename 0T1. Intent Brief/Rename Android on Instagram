@@ -1,0 +1,3 @@
+UPDATE allownedposts.stage_googlepostdata
+SET Account = 'Android'
+WHERE Account = 'android Instagram';

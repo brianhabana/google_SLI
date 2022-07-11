@@ -1,0 +1,36 @@
+SELECT
+    CASE
+        WHEN Social_Network <> 'Facebook'
+        OR Social_Network <> 'LinkedIn' THEN CONCAT('@', Account)
+        ELSE Account
+    END AS Account,
+    Social_Network,
+    CONCAT(FORMAT(count(Engagements), 0), ' posts') AS Post_Count,
+    CONCAT(FORMAT(avg(Engagements), 0), ' engagements') AS Avg_Engagements,
+    CONCAT(FORMAT(avg(Engagement_Rate), 2), '%') AS Avg_Engagement_Rate,
+    CONCAT(FORMAT(avg(Impressions), 0), ' impressions') AS Avg_Impressions,
+    CONCAT(FORMAT(avg(Likes), 0), ' likes') AS Avg_Likes,
+    CONCAT(FORMAT(avg(Comments), 0), ' comments') AS Avg_Comments,
+    CONCAT(FORMAT(avg(Shares), 0), ' shares') AS Avg_Shares,
+    CONCAT(FORMAT(MAX(Engagements), 0), ' max') AS MAX_Engagements,
+    CONCAT(FORMAT(MAX(Engagement_Rate), 2), '% max') AS MAX_Engagement_Rate,
+    CONCAT(FORMAT(MAX(Impressions), 0), ' max') AS MAX_Impressions,
+    CONCAT(FORMAT(MAX(Likes), 0), ' max') AS MAX_Likes,
+    CONCAT(FORMAT(MAX(Comments), 0), ' max') AS MAX_Comments,
+    CONCAT(FORMAT(MAX(Shares), 0), ' max') AS MAX_Shares,
+    TimeframeText,
+    TimeframeName
+FROM
+    { { get_all_attributes_2.attributes__Timeframe } }
+WHERE
+    Published_Date BETWEEN '{{get_all_attributes_2.attributes__Custom_StartDate}}'
+    AND '{{get_all_attributes_2.attributes__Custom_EndDate}}'
+    AND Account = '{{get_all_attributes_2.attributes__Account}}'
+    AND Social_Network = '{{get_all_attributes_2.attributes__Social_Network}}'
+    AND IG_STORY_IMPRESSIONS = 0
+GROUP BY
+    Account,
+    TimeframeText,
+    TimeframeName
+LIMIT
+    10

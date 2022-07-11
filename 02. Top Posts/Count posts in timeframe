@@ -1,0 +1,22 @@
+SELECT
+    Account,
+    COUNT(*) AS Post_Count,
+    TimeframeText,
+    TimeframeName
+FROM
+    { { get_all_attributes.attributes__Timeframe } }
+WHERE
+    Published_Date BETWEEN '{{get_all_attributes.attributes__Custom_StartDate}}'
+    AND '{{get_all_attributes.attributes__Custom_EndDate}}'
+    AND Account = '{{get_all_attributes.attributes__Account}}'
+    AND Social_Network = '{{get_all_attributes.attributes__Social_Network}}'
+    AND Campaign_Name LIKE '%{{get_all_attributes.attributes__Campaign_Name}}%'
+    AND IG_STORY_IMPRESSIONS = 0
+GROUP BY
+    Account,
+    TimeframeText,
+    TimeframeName
+ORDER BY
+    '{{get_all_attributes.attributes__Metric}}' DESC
+LIMIT
+    10

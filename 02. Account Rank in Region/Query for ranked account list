@@ -1,0 +1,38 @@
+SELECT
+    Account,
+    Social_Network,
+    Region,
+    CONCAT(FORMAT(EngagementsAvg, 0), ' avg engagements') AS EngagementsAvg,
+    CONCAT(FORMAT(EngagementsMax, 0), ' max') AS EngagementsMax,
+    CONCAT(
+        FORMAT(EngagementRateAvg, 2),
+        ' avg engagement rate'
+    ) AS EngagementRateAvg,
+    CONCAT(FORMAT(EngagementRateMax, 2), ' max') AS EngagementRateMax,
+    CONCAT(PostCount, ' posts') AS PostCount
+FROM
+    (
+        SELECT
+            Account,
+            Social_Network,
+            Region,
+            ROUND(AVG(Engagements)) AS EngagementsAvg,
+            ROUND(MAX(Engagements)) AS EngagementsMax,
+            ROUND(AVG(Engagement_Rate), 2) AS EngagementRateAvg,
+            ROUND(MAX(Engagement_Rate), 2) AS EngagementRateMax,
+            COUNT(*) AS PostCount
+        FROM
+            { { get_all_attributes.attributes__Timeframe } }
+        WHERE
+            Social_Network = '{{get_all_attributes.attributes__Social_Network}}'
+            AND Region LIKE '%{{get_all_attributes.attributes__Region}}%'
+            AND Published_Date BETWEEN '{{get_all_attributes.attributes__Custom_StartDate}}'
+            AND '{{get_all_attributes.attributes__Custom_EndDate}}'
+            AND IG_STORY_IMPRESSIONS = 0
+        GROUP BY
+            Account,
+            Social_Network,
+            Region
+        ORDER BY
+            { { ask_for_rank_metric.parsed_answer } } DESC
+    ) sorted

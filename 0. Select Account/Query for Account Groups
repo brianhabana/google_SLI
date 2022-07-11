@@ -1,0 +1,8 @@
+SELECT
+    DISTINCT account_group
+FROM
+    account_group
+WHERE
+    account_group NOT LIKE 'All Accounts (%'
+ORDER BY
+    account_group ASC
